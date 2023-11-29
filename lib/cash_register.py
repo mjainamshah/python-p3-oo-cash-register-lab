@@ -2,42 +2,35 @@
 
 class CashRegister:
     def __init__(self, discount=0):
+        self.discount = discount
         self.total = 0
         self.items = []
-        self.prices = []
-        self.discount = discount
-        self.last_transaction = 0
+        self.previous_transactions = []
 
-    def add_item(self, title, price, quantity=1):
-        self.last_transaction = price * quantity
-        self.total += self.last_transaction
-        self.items.append({'item': title, 'quantity': quantity})
-        self.prices.append(price * quantity)
+    def add_item(self, item, price, quantity=1):
+        self.total += price * quantity
+        for _ in range(quantity):
+            self.items.append(item)
+        self.previous_transactions.append(
+            {"item": item, "quantity": quantity, "price": price}
+        )
 
     def apply_discount(self):
-        if self.discount > 0:
-            discount_amount = (self.discount / 100.0) * self.total
-            self.total -= discount_amount
-            return f"After the discount, the total comes to ${self.total}."
+        if self.discount:
+            self.total = int(self.total * ((100 - self.discount) / 100))
+            print(f"After the discount, the total comes to ${self.total}.")
         else:
-            return "There is no discount to apply."
+            print("There is no discount to apply.")
 
     def void_last_transaction(self):
-        if self.prices:
-            self.total -= self.last_transaction
+        if not self.previous_transactions:
+            return "There are no transactions to void."
+        self.total -= (
+            self.previous_transactions[-1]["price"]
+            * self.previous_transactions[-1]["quantity"]
+        )
+        for _ in range(self.previous_transactions[-1]["quantity"]):
             self.items.pop()
-            self.prices.pop()
-        else:
-            self.total = 0
-
-    def get_items(self):
-      items_list = []
-      for item in self.items:
-        items_list.extend([item['item']] * item['quantity'])
-      return items_list
-
-
-    def get_items_with_quantity(self):
-        return self.items
+        self.previous_transactions.pop()
 pass
 
